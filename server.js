@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-// import bodyParser from "body-parser";
 import helmet from "helmet"; // Import helmet for CSP management
 import { runWeather } from "./gemini-start.js";
 const app = express();
@@ -42,6 +41,16 @@ app.post("/location-weather", async (req, res) => {
 		const details = await runWeather(location);
 		res.json(details); // Send location details in JSON response
 	} catch (error) {
+		if (
+			error instanceof GoogleGenerativeAIFetchError &&
+			error.message.includes("503 Service Unavailable")
+		) {
+			return { error: "Weather service overloaded. Please try again later." }; // Handle overloaded weather service
+		} else if (error.name === "ValidationError") {
+			// Example: Handle validation errors
+			return { error: "Invalid input data. Please check and try again." };
+		}
+
 		console.error("Error retrieving location details:", error);
 		res.status(500).send({ message: "Internal server error" });
 	}
