@@ -1,7 +1,10 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet"; // Import helmet for CSP management
+import { getWeatherData } from "./getweather.js";
 import { runWeather } from "./gemini-start.js";
+import rateLimit from "express-rate-limit";
+
 const app = express();
 app.use(cors());
 
@@ -24,35 +27,49 @@ const cspConfig = {
 // Set CSP headers using Helmet
 app.use(helmet.contentSecurityPolicy(cspConfig));
 
+const limiter = rateLimit({
+	windowMs: 24 * 60 * 60 * 1000, //
+	max: 10,
+	standardHeaders: true,
+	statusCode: 429, // 429 status code for too many requests
+	message: "You have exceeded the rate limit. Please try again later.",
+});
+
+app.use(limiter);
+
 // Route to handle location weather requests
-app.post("/location-weather", async (req, res) => {
+app.post("/location-weather", limiter, async (req, res) => {
 	// Extract location from request body
 	const location = req.body;
-
 	// Validate request body
 	if (!location) {
 		return res
 			.status(400)
 			.send({ message: "Missing location in request body" });
 	}
-
 	try {
-		// Retrieve location details
-		const details = await runWeather(location);
-		res.json(details); // Send location details in JSON response
-	} catch (error) {
-		if (
-			error instanceof GoogleGenerativeAIFetchError &&
-			error.message.includes("503 Service Unavailable")
-		) {
-			return { error: "Weather service overloaded. Please try again later." }; // Handle overloaded weather service
-		} else if (error.name === "ValidationError") {
-			// Example: Handle validation errors
-			return { error: "Invalid input data. Please check and try again." };
+		// Retrieve location details and weather forecast
+		const locationdata = await getWeatherData(
+			location.latitude,
+			location.longitude,
+			location.location
+		);
+		try {
+			// Retrieve location prediction summary
+			const details = await runWeather(locationdata);
+			res.json(details); // Send location details in JSON response
+		} catch (error) {
+			if (error.name === "ValidationError") {
+				// Example: Handle validation errors
+				return { error: "Invalid input data. Please check and try again." };
+			} else if (error.statusCode(429)) {
+				return { error: "Too many requests! Try later on" };
+			}
+			console.error("Error in retrieving predictions of location", error);
+			res.status(500).send({ message: "Internal server error" });
 		}
-
-		console.error("Error retrieving location details:", error);
-		res.status(500).send({ message: "Internal server error" });
+	} catch (error) {
+		console.error("Error retrieving location details from API", error);
 	}
 });
 

@@ -32,7 +32,6 @@ async function runWeather(data) {
 	const location = data.location;
 
 	const dataString = JSON.stringify(data);
-
 	// const prompt =
 	// 	`Based on the below forecast data, can you analyse and tell me how the weather will be mostly in ${currentMonth},${year} month in ${location} and what can be the potential natural risks? Please provide me only short conclusion` +
 	// 	dataString;
