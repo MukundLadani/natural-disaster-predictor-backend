@@ -36,7 +36,7 @@ async function runWeather(data) {
 	// 	`Based on the below forecast data, can you analyse and tell me how the weather will be mostly in ${currentMonth},${year} month in ${location} and what can be the potential natural risks? Please provide me only short conclusion` +
 	// 	dataString;
 
-	const prompt = `Based on the below forecast data, can you analyse and tell me how the weather will be mostly in ${currentMonth},${year} month in ${location} and what can be the potential natural risks? Please provide me only a short conclusion.\n\n**Analysis:** ${dataString}`;
+	const prompt = `Based on the below forecast data, can you analyse and tell me how the weather will be mostly in ${currentMonth},${year} month in ${location} and what can be the potential natural risks? Please provide me only a short conclusion and avoid using **.\n\n**Analysis:** ${dataString}`;
 	const result = await model.generateContent(prompt);
 	const response = await result.response;
 	const text = response.text();
