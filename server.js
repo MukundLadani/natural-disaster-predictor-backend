@@ -27,9 +27,11 @@ const cspConfig = {
 // Set CSP headers using Helmet
 app.use(helmet.contentSecurityPolicy(cspConfig));
 
+// Need to limit requests
+// Requirement: Less than 10'000 API calls per day, 5'000 per hour and 600 per minute.
 const limiter = rateLimit({
 	windowMs: 24 * 60 * 60 * 1000, //
-	max: 10,
+	max: 800, // Max to max 400 requests can be made in 24 hours
 	standardHeaders: true,
 	statusCode: 429, // 429 status code for too many requests
 	message: "You have exceeded the rate limit. Please try again later.",
@@ -49,6 +51,7 @@ app.post("/location-weather", limiter, async (req, res) => {
 	}
 	try {
 		// Retrieve location details and weather forecast
+
 		const locationdata = await getWeatherData(
 			location.latitude,
 			location.longitude,
