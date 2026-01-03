@@ -28,7 +28,7 @@ const monthNames = [
 const currentMonth = monthNames[month];
 
 async function runWeather(data) {
-	const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+	const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 	const location = data.location;
 
 	const dataString = JSON.stringify(data);
@@ -37,9 +37,16 @@ async function runWeather(data) {
 	// 	dataString;
 
 	const prompt = `Based on the below forecast data, can you analyse and tell me how the weather will be mostly in ${currentMonth},${year} month in ${location} and what can be the potential natural risks? Please provide me only a short conclusion and avoid using **.\n\n**Analysis:** ${dataString}`;
-	const result = await model.generateContent(prompt);
-	const response = await result.response;
-	const text = response.text();
+	try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text(); 
+    } catch (err) {
+        if (err.status === 404) {
+            console.error("MODEL NOT FOUND: Ensure 'gemini-1.5-flash-latest' is enabled in your Google AI Studio project.");
+        }
+        throw err;
+    }
 
 	// const prompt2 =
 	// 	"Give me short conclusion part about prediction from the following text. Also, don't give me any headings like '*Conclusions*' just give me paragarph" +
@@ -49,7 +56,7 @@ async function runWeather(data) {
 	// const response2 = await result2.response;
 	// const text2 = response2.text();
 
-	return text;
+	// return text;
 }
 
 export { runWeather };
