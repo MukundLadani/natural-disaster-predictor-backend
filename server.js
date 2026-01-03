@@ -6,6 +6,8 @@ import { runWeather } from "./gemini-start.js";
 import rateLimit from "express-rate-limit";
 
 const app = express();
+
+app.set("trust proxy", 1);
 app.use(cors());
 
 app.use(express.json());
@@ -65,8 +67,11 @@ app.post("/location-weather", limiter, async (req, res) => {
 			if (error.name === "ValidationError") {
 				// Example: Handle validation errors
 				return { error: "Invalid input data. Please check and try again." };
-			} else if (error.statusCode(429)) {
-				return { error: "Too many requests! Try later on" };
+			}
+			if (error?.statusCode === 429) {
+				return res.status(429).json({
+				error: "Too many requests! Try later on"
+				});
 			}
 			console.error("Error in retrieving predictions of location", error);
 			res.status(500).send({ message: "Internal server error" });
