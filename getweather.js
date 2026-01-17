@@ -17,7 +17,7 @@ async function getWeatherData(latitude, longitude, location) {
 			console.log("Error retrieving weather data. Please try again later.");
 		}
 		console.error("Error sending location data:", error);
-		throw error; // Re-throw the error for further handling if necessary
+		throw error; 
 	}
 }
 
