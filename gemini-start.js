@@ -27,7 +27,7 @@ const monthNames = [
 const currentMonth = monthNames[month];
 
 async function runWeather(data) {
-	const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+	const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 	const location = data.location;
 
 	const dataString = JSON.stringify(data);
@@ -44,8 +44,8 @@ async function runWeather(data) {
         console.error("Gemini Execution Error:", error.message);
         // Fallback to 2.5 if 2.0 is somehow restricted in your region
         if (error.status === 404) {
-            console.log("Attempting fallback to gemini-2.5-flash...");
-            const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            console.log("Attempting fallback to gemini-2.0-flash...");
+            const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
             const fallbackResult = await fallbackModel.generateContent(prompt);
             return fallbackResult.response.text();
         }
