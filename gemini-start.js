@@ -43,7 +43,7 @@ async function runWeather(data) {
     } catch (error) {
         console.error("Gemini Execution Error:", error.message);
         // Fallback to flash-lite if primary flash is somehow unavailable
-        if (error.status === 404) {
+        if (error.status === 404 || error.status === 503) {
             console.log("Attempting fallback to gemini-3.1-flash-lite...");
             const fallbackModel = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
             const fallbackResult = await fallbackModel.generateContent(prompt);
